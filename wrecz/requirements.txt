@@ -1,0 +1,73 @@
+# WRECZ backend dependencies
+#
+# Python 3.12, Windows only. Versions are pinned to what WRECZ is known to
+# run on; regenerate with `pip freeze` if you deliberately upgrade.
+#
+#   py -3.12 -m venv .venv
+#   .venv\Scripts\activate
+#   pip install -r requirements.txt
+#
+# NOT installable from here, and both are required:
+#   - Ollama, running locally on port 11434
+#   - the `wrecz-brain` model (a phi4-mini derivative, ~2.5 GB)
+# See ARCHITECTURE.md for how those fit in.
+
+# =========================================================
+# Brain
+# =========================================================
+# Talks to Ollama's HTTP API.
+requests==2.34.2
+
+# =========================================================
+# Voice (Kokoro, realtime)
+# =========================================================
+# Imported first by main.py and api_server.py to dodge the Windows
+# c10.dll / WinRT initialisation conflict. Order matters, not just presence.
+torch==2.14.0
+
+kokoro==0.9.4
+# Kokoro's g2p. WRECZ writes its pronunciation override straight into
+# misaki's lexicon, so this is a direct dependency, not just transitive.
+misaki==0.9.4
+soundfile==0.14.0
+# Streams Kokoro's audio slices to the speakers. The blocking write is also
+# what paces the visualizer, so this is load-bearing beyond playback.
+sounddevice==0.5.6
+numpy==2.5.3
+
+# =========================================================
+# Frontend bridge (api_server.py)
+# =========================================================
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.5
+# WebSocket transport for uvicorn. Without it the /ws endpoint fails to
+# upgrade and the UI never connects.
+websockets==17.1
+
+# =========================================================
+# Security tray
+# =========================================================
+pystray==0.19.5
+# Draws the red/green tray indicator.
+pillow==12.3.0
+
+# =========================================================
+# Windows system control
+# =========================================================
+# Wi-Fi and Bluetooth radios. Volume and brightness use native calls and
+# need nothing extra.
+#
+# All four are required. Radios alone imports fine but fails at call time
+# with "No module named 'winrt.windows.foundation'" - the async plumbing
+# lives in separate namespace packages.
+winrt-runtime==3.2.1
+winrt-Windows.Devices.Radios==3.2.1
+winrt-Windows.Foundation==3.2.1
+winrt-Windows.Foundation.Collections==3.2.1
+
+# =========================================================
+# Tests
+# =========================================================
+# Required by fastapi.testclient for test_bridge.py.
+httpx==0.28.1

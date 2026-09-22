@@ -1,0 +1,50 @@
+# =========================================================
+# Python
+# =========================================================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# The virtualenv is ~1.1 GB (torch alone is 501 MB). Recreate it with
+# the install steps in INTEGRATION.md instead of committing it.
+.venv/
+venv/
+env/
+
+# =========================================================
+# WRECZ runtime state
+# =========================================================
+
+# Rewritten on every launch, and always OFF at session start.
+security/security_state.json
+
+# The activity log records which applications you open and which files
+# you touch. It is your usage history, not source code.
+logs/*.jsonl
+logs/*.log
+
+# The Router's sandbox: files created by using WRECZ, not part of it.
+workspace/*
+!workspace/.gitkeep
+
+# Audio produced by voice tests.
+*.wav
+
+# =========================================================
+# Editors / OS
+# =========================================================
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# =========================================================
+# Secrets - nothing here today, keep it that way
+# =========================================================
+.env
+.env.*
+*.pem
+*.key

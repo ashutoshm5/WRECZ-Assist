@@ -1,0 +1,4 @@
+FROM phi4-mini
+
+PARAMETER num_gpu 99
+PARAMETER num_ctx 2048

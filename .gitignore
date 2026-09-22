@@ -1,0 +1,71 @@
+# =========================================================
+# Python & Virtual Environments (~1.1 GB)
+# =========================================================
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# =========================================================
+# Node & Frontend Build Outputs (~100 MB)
+# =========================================================
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+.cache/
+.vite/
+*.tsbuildinfo
+*-debug.log*
+
+# =========================================================
+# Tauri Desktop Shell (Rust Build Cache ~5.2 GB)
+# Note: Keep src-tauri/ source files, only exclude build output
+# =========================================================
+**/target/
+**/gen/
+
+# =========================================================
+# Stale Duplicates & Machine-Specific Files
+# =========================================================
+WRECZ-frontend-pass-1/
+WRECZ.bat
+main_original_uploaded.py
+
+# =========================================================
+# WRECZ Runtime State & Private Activity Logs
+# =========================================================
+**/security_state.json
+**/logs/*.jsonl
+**/logs/*.log
+**/workspace/*
+!**/workspace/.gitkeep
+*.wav
+
+# =========================================================
+# Environment Variables & Secrets
+# =========================================================
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.keystore
+
+# =========================================================
+# Editors, IDEs & OS Files
+# =========================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,700 @@
+@import "tailwindcss";
+
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+  background: #d1d1d1;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 900px;
+  min-height: 650px;
+  overflow: hidden;
+  background: #d1d1d1;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wrecz-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #d1d1d1;
+}
+
+/* ==========================================================
+   DESKTOP SHELL
+   ==========================================================
+   The window is frameless, so the header doubles as the drag handle and the
+   app supplies its own controls. Both are inert in a browser tab. */
+
+.wrecz-window-controls {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  top: 0;
+  display: flex;
+}
+
+.wrecz-window-controls button {
+  width: 44px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.wrecz-window-controls svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+}
+
+.wrecz-window-controls button:hover { background: rgba(0, 0, 0, 0.08); }
+
+.wrecz-window-controls .wrecz-window-close:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+.wrecz-header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  height: 108px;
+  box-sizing: border-box;
+  padding: 40px 40px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.wrecz-logo {
+  display: block;
+  width: 166px;
+  height: auto;
+  user-select: none;
+}
+
+
+.wrecz-header-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+  padding-top: 13px;
+}
+
+.wrecz-action {
+  position: relative;
+  width: 34px;
+  height: 35px;
+}
+
+.wrecz-icon-button {
+  position: relative;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.wrecz-icon-button img {
+  display: block;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 180ms ease;
+}
+
+.wrecz-icon-button:hover img {
+  transform: scale(1.04);
+}
+
+.wrecz-icon-button img.settings-open {
+  transform: rotate(90deg);
+}
+
+.wrecz-action:nth-child(1) img { width: 34.467px; height: 34.467px; }
+.wrecz-action:nth-child(2) img { width: 31px; height: 31px; }
+.wrecz-action:nth-child(3) img { width: 27.035px; height: 27.035px; }
+.wrecz-action:nth-child(4) img { width: 34px; height: 34px; }
+
+/* ==========================================================
+   VOICE VISUALIZER
+   ==========================================================
+   The centre line of the layout: a straight line until WRECZ first speaks,
+   the waveform while it speaks, and a slow idle wave after that. */
+
+.wrecz-visualizer {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  top: 41.26%;
+}
+
+/* One canvas for every state. The resting line is drawn with the same stroke
+   as the waveform, so the line weight never changes and waking up is a
+   continuous animation rather than an element swap. */
+.wrecz-visualizer-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 260px;
+  transform: translateY(-50%);
+  display: block;
+  pointer-events: none;
+}
+
+.wrecz-main {
+  position: absolute;
+  inset: 0;
+}
+
+.wrecz-composer {
+  position: absolute;
+  left: 50%;
+  top: 72.85%;
+  width: min(779px, calc(100vw - 160px));
+  height: 75px;
+  transform: translateX(-50%);
+  border: 1px solid #9c9c9c;
+  border-radius: 97px;
+  box-sizing: border-box;
+  background: rgba(217, 217, 217, 0.2);
+  box-shadow: inset 3px 4px 9.6px 1px rgba(0, 0, 0, 0.07);
+}
+
+.wrecz-composer input {
+  position: absolute;
+  left: 36px;
+  right: 100px;
+  top: 50%;
+  width: calc(100% - 136px);
+  height: 34px;
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 22.286px;
+  line-height: 1;
+}
+
+.wrecz-composer input::placeholder {
+  color: rgba(0, 0, 0, 0.7);
+  opacity: 1;
+}
+
+.wrecz-send {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 57px;
+  height: 47px;
+  transform: translateY(-50%);
+  padding: 0;
+  border: 0;
+  border-radius: 97px;
+  background: transparent;
+  color: #000;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: width 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.wrecz-send svg {
+  width: 44.681px;
+  height: 33.429px;
+}
+
+.wrecz-send.is-hovered {
+  width: 100px;
+  background: #000;
+  color: #fff;
+}
+
+.wrecz-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 100;
+  transform-origin: top right;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.985);
+  transition: opacity 150ms ease, transform 150ms ease;
+  pointer-events: none;
+}
+
+.wrecz-dropdown.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.dropdown-settings { right: -1px; }
+.dropdown-notifications { right: -1px; }
+.dropdown-menu { right: -1px; }
+
+.wrecz-menu-panel {
+  width: 152px;
+  box-sizing: border-box;
+  padding: 6.2px 3.38px;
+  border: 1px solid #000;
+  border-radius: 16.889px;
+  background: #d6d6d6;
+  overflow: hidden;
+}
+
+.wrecz-menu-panel button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  height: 20.337px;
+  margin: 4.7px 0;
+  padding: 0 9px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 3.28px;
+  background: transparent;
+  color: #000;
+  font-size: 13.268px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wrecz-menu-panel button:hover { background: #c9c9c9; }
+.wrecz-menu-panel button:active { background: #bebebe; }
+
+.wrecz-menu-divider {
+  height: 1px;
+  margin: 0 0;
+  background: rgba(136, 136, 136, 0.92);
+}
+
+.wrecz-menu-badge {
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: #000;
+  color: #fff;
+  font-size: 9.5px;
+  line-height: 15px;
+  text-align: center;
+}
+
+.wrecz-unread-dot {
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid #d1d1d1;
+  border-radius: 50%;
+  background: #000;
+}
+
+.wrecz-settings-panel {
+  position: relative;
+  width: 199.826px;
+  height: 155px;
+  box-sizing: border-box;
+  border: 0.969px solid #000;
+  border-radius: 16.293px;
+  background: #d6d6d6;
+  overflow: hidden;
+}
+
+.wrecz-settings-row {
+  position: relative;
+  height: 40px;
+  box-sizing: border-box;
+  padding-left: 17.3px;
+  padding-right: 19.8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(136, 136, 136, 0.92);
+  color: #000;
+  font-size: 13.27px;
+  line-height: 0.8272;
+}
+
+.wrecz-settings-row:first-child {
+  height: 36px;
+  padding-top: 2px;
+}
+
+.wrecz-settings-row--two-line {
+  height: 41px;
+  align-items: flex-start;
+  padding-top: 9px;
+}
+
+.wrecz-settings-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: #9e9e9e;
+  line-height: 0.8272;
+  user-select: none;
+}
+
+.wrecz-settings-footer span:first-child { font-size: 11.915px; }
+.wrecz-settings-footer span:last-child { font-size: 8.926px; }
+
+.wrecz-toggle {
+  position: relative;
+  flex: 0 0 auto;
+  width: 35.277px;
+  height: 17.639px;
+  padding: 0;
+  border: 0;
+  border-radius: 21.558px;
+  background: #000;
+  cursor: pointer;
+}
+
+.wrecz-toggle-knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 14.372px;
+  height: 14.372px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: #d6d6d6;
+  transition: left 160ms ease;
+}
+
+.wrecz-toggle-knob.is-on { left: 18.9px; }
+
+.wrecz-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.wrecz-settings-panel.is-disabled .wrecz-settings-row span {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+
+.wrecz-notifications-panel {
+  position: relative;
+  width: 249px;
+  height: 236px;
+  box-sizing: border-box;
+  border: 1px solid #000;
+  border-radius: 25.745px;
+  background: #d6d6d6;
+  display: flex;
+  justify-content: center;
+  padding-top: 15px;
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 14.52px;
+  line-height: 0.81;
+}
+
+.wrecz-account-panel {
+  position: relative;
+  width: 248px;
+  height: 127px;
+  box-sizing: border-box;
+  border: 1px solid #000;
+  border-radius: 25.74px;
+  background: #d7d7d7;
+  text-align: center;
+  overflow: hidden;
+}
+
+.wrecz-account-name {
+  margin-top: 24px;
+  font-size: 18.993px;
+  line-height: 0.81;
+}
+
+.wrecz-account-role {
+  margin-top: 7px;
+  font-size: 11.381px;
+  line-height: 0.81;
+  opacity: 0.28;
+}
+
+.wrecz-account-owner {
+  position: absolute;
+  left: 36px;
+  top: 68px;
+  width: 174px;
+  height: 33px;
+  box-sizing: border-box;
+  border-radius: 24px;
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.54);
+  display: grid;
+  place-items: center;
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-size: 11.381px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.9), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+/* ==========================================================
+   TRANSCRIPT
+   ========================================================== */
+
+.wrecz-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+  justify-content: flex-end;
+}
+
+.wrecz-conversation-body::-webkit-scrollbar { width: 6px; }
+.wrecz-conversation-body::-webkit-scrollbar-track { background: transparent; }
+
+.wrecz-conversation-body::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.wrecz-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 88%;
+}
+
+.wrecz-entry--you { align-self: flex-end; align-items: flex-end; }
+
+.wrecz-entry-role {
+  color: rgba(0, 0, 0, 0.38);
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.wrecz-entry-text {
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 18px;
+  background: rgba(217, 217, 217, 0.55);
+  box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.82);
+  font-size: 13.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.wrecz-entry--you .wrecz-entry-text {
+  background: #000;
+  color: #f2f2f2;
+  box-shadow: none;
+}
+
+.wrecz-entry--system .wrecz-entry-text {
+  background: rgba(163, 36, 36, 0.09);
+  color: #6f1d1d;
+  font-size: 12.5px;
+}
+
+/* ==========================================================
+   CONVERSATION BOX
+   ========================================================== */
+
+.dropdown-conversation { right: -1px; }
+
+.wrecz-conversation-panel {
+  display: flex;
+  flex-direction: column;
+  width: 372px;
+  height: 428px;
+  box-sizing: border-box;
+  border: 1px solid #000;
+  border-radius: 25.745px;
+  background: #d6d6d6;
+  overflow: hidden;
+}
+
+.wrecz-conversation-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 15px 22px 11px;
+  border-bottom: 1px solid rgba(136, 136, 136, 0.92);
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 14.52px;
+  line-height: 0.81;
+}
+
+.wrecz-conversation-busy {
+  color: rgba(0, 0, 0, 0.36);
+  font-size: 11px;
+}
+
+.wrecz-conversation-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 18px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+.wrecz-conversation-empty {
+  margin: 0;
+  padding-top: 8px;
+  color: rgba(0, 0, 0, 0.34);
+  font-size: 13px;
+  text-align: center;
+}
+
+.wrecz-entry-text--busy::after {
+  content: "...";
+  animation: wrecz-ellipsis 1.2s steps(4, end) infinite;
+}
+
+@keyframes wrecz-ellipsis {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+}
+
+/* ==========================================================
+   SECURITY CONFIRMATION
+   ========================================================== */
+
+.wrecz-confirm {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  top: calc(72.85% - 24px);
+  width: min(779px, calc(100vw - 160px));
+  box-sizing: border-box;
+  padding: 16px 22px 18px;
+  transform: translate(-50%, -100%);
+  border: 1px solid #000;
+  border-radius: 22px;
+  background: #d6d6d6;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+}
+
+.wrecz-confirm-kind {
+  display: block;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.wrecz-confirm-question {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.wrecz-confirm-detail {
+  margin: 6px 0 0;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.wrecz-confirm-reason {
+  margin: 4px 0 0;
+  color: rgba(0, 0, 0, 0.42);
+  font-size: 12px;
+}
+
+.wrecz-confirm-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.wrecz-confirm-actions button {
+  min-width: 96px;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 97px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.wrecz-confirm-deny {
+  border: 1px solid #000;
+  background: transparent;
+  color: #000;
+}
+
+.wrecz-confirm-deny:hover { background: rgba(0, 0, 0, 0.07); }
+
+.wrecz-confirm-allow {
+  border: 1px solid #000;
+  background: #000;
+  color: #fff;
+}
+
+.wrecz-confirm-allow:hover { background: #242424; }
+
+.wrecz-confirm-actions button:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+@media (max-height: 760px) {
+  .wrecz-composer { top: 70%; }
+  .wrecz-confirm { top: calc(70% - 24px); }
+}

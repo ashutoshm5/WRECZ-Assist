@@ -1,0 +1,10 @@
+{
+  "description": "Delivers fully interactive, visually accurate UI prototypes with seamless state transitions and animations for designers and developers to preview and test.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

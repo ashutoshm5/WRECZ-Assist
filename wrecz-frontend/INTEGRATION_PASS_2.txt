@@ -1,0 +1,43 @@
+WRECZ frontend <-> backend connection
+
+The frontend talks to the WRECZ agent through the local bridge at
+127.0.0.1:8765 (api_server.py in the wrecz backend repo).
+
+  src/lib/wreczApi.ts        WebSocket + HTTP client for the bridge
+  src/hooks/useWrecz.ts      connection, transcript, status and settings state
+  src/components/
+    WreczApp.tsx             wires the UI to the hook
+    VoiceVisualizer.tsx      centre-line waveform, driven by system audio
+    ConversationPanel.tsx    transcript, opened from the menu dropdown
+    Transcript.tsx           message list
+    ConfirmPrompt.tsx        answers WRECZ's security prompts
+    Panels.tsx               menu + Settings panel (writes to the backend)
+
+The existing UI and assets are unchanged; the SVG logo is preserved.
+
+CONVERSATION BOX
+The transcript is not on the main view. Open it from the menu dropdown
+(top right) via "Conversation box". The menu icon carries an unread dot and
+the item shows a count for anything that arrived while it was closed.
+
+VOICE VISUALIZER
+The waveform engine is the locked visualizer kit, ported unchanged into
+VoiceVisualizer.tsx. It is wired straight to the voice engine: the bridge
+forwards each slice of Kokoro audio as it is written to the speakers,
+src/lib/voiceStream.ts keeps a rolling buffer, and the draw loop reads a
+window every frame. Nothing to enable and nothing to share.
+
+Three phases:
+  dormant  - a perfectly straight line, until WRECZ first speaks
+  speaking - the waveform, in step with what is being heard
+  live     - a slow idle wave between utterances, so the assistant reads as
+             awake rather than switched off
+
+Everything is drawn on one canvas through a single stroke function, including
+the resting line. There is no element swap, so the line never changes weight
+and waking up is a continuous bloom (about 1s to 90%) rather than a cut.
+
+Audio never passes through React state, so speech does not re-render the app.
+
+Run both halves together with `python run_all.py` in the backend repo.
+The full protocol is documented there in INTEGRATION.md.
