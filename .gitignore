@@ -69,3 +69,6 @@ main_original_uploaded.py
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Executables
+*.exe
