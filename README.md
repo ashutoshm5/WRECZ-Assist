@@ -90,7 +90,20 @@ Ensure the following tools are installed on your Windows machine:
 
 ## 🚀 Quick Start
 
-### 1. Configure the Ollama Model
+### Option 1: One-Click Automated Installer (Recommended)
+Simply **double-click `setup_prerequisites.cmd`** in the repository root.
+It will automatically:
+* Check and install **Python 3.12**, **Node.js LTS**, and **Ollama**.
+* Check and install **Rust** and **MSVC C++ Build Tools** for Tauri.
+* Download `phi4-mini` and build the local `wrecz-brain` model.
+* Create the backend `.venv`, install PyTorch / Kokoro requirements, and run `npm install`.
+* Present a launch menu to immediately run the app!
+
+---
+
+### Option 2: Manual Step-by-Step Setup
+
+#### 1. Configure the Ollama Model
 In the root directory, create the local `wrecz-brain` model:
 ```powershell
 ollama create wrecz-brain -f Modelfile
