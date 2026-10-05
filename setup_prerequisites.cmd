@@ -2,29 +2,19 @@
 setlocal EnableDelayedExpansion
 
 :: ============================================================================
-:: WRECZ — Complete Automated Prerequisites & Environment Installer
+:: WRECZ — Complete Automated Prerequisites and Environment Installer
 :: Double-click this .cmd to install:
 ::   - Python 3.12
 ::   - Node.js LTS
-::   - Ollama & phi4-mini model & wrecz-brain
-::   - Rustup & Visual Studio C++ Build Tools (Tauri 2 prerequisites)
-::   - Python .venv & requirements.txt
-::   - Frontend node_modules (npm install)
+::   - Ollama and phi4-mini model and wrecz-brain
+::   - Rustup and Visual Studio C++ Build Tools - Tauri 2 prerequisites
+::   - Python .venv and requirements.txt
+::   - Frontend node_modules - npm install
 :: ============================================================================
-
-:: 1. Self-Elevation to Administrator
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ======================================================================
-    echo [WRECZ SETUP] Requesting Administrator privileges...
-    echo ======================================================================
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
-    exit /b
-)
 
 :: Set script directory as active working directory
 cd /d "%~dp0"
-title WRECZ Setup & Prerequisites Installer
+title WRECZ Setup and Prerequisites Installer
 
 cls
 echo ======================================================================
@@ -35,12 +25,23 @@ echo.
 echo This script will check and install all required prerequisites:
 echo   [1] Python 3.12 (64-bit)
 echo   [2] Node.js LTS
-echo   [3] Ollama Engine + phi4-mini model + wrecz-brain
-echo   [4] Rust & Visual Studio C++ Build Tools (Tauri 2 desktop prerequisites)
+echo   [3] Ollama Engine, phi4-mini model, and wrecz-brain
+echo   [4] Rust and Visual Studio C++ Build Tools (Tauri 2 desktop prerequisites)
 echo   [5] Backend Python Virtual Environment (.venv + PyTorch/Kokoro)
 echo   [6] Frontend Node dependencies (npm install)
 echo.
 echo ======================================================================
+echo.
+
+:: 1. Check Administrator Privileges (informational)
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [INFO] Running in standard user mode.
+    echo        Tip: If any winget system-wide installs fail, right-click and
+    echo        select 'Run as administrator'.
+) else (
+    echo [INFO] Running with verified Administrator privileges.
+)
 echo.
 
 :: 2. Refresh Path helper
@@ -49,7 +50,7 @@ call :refresh_path
 :: Check for winget
 where winget >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERROR] Windows Package Manager (winget) is not installed or not in PATH.
+    echo [ERROR] Windows Package Manager winget is not installed or not in PATH.
     echo Please install App Installer from Microsoft Store or update Windows.
     pause
     exit /b 1
@@ -61,7 +62,7 @@ if %errorlevel% neq 0 (
 echo [STEP 1/6] Checking Python 3.12...
 py -3.12 --version >nul 2>&1
 if %errorlevel% equ 0 (
-    for /f "tokens=*" %%v in ('py -3.12 --version 2^>^&1') do echo [OK] Found %%v
+    echo [OK] Python 3.12 is already installed.
 ) else (
     echo [INSTALL] Installing Python 3.12 via winget...
     winget install -e --id Python.Python.3.12 --accept-package-agreements --accept-source-agreements
@@ -75,7 +76,7 @@ echo.
 echo [STEP 2/6] Checking Node.js...
 node --version >nul 2>&1
 if %errorlevel% equ 0 (
-    for /f "tokens=*" %%v in ('node --version 2^>^&1') do echo [OK] Found Node.js %%v
+    echo [OK] Node.js is already installed.
 ) else (
     echo [INSTALL] Installing Node.js LTS via winget...
     winget install -e --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
@@ -84,12 +85,12 @@ if %errorlevel% equ 0 (
 echo.
 
 :: ============================================================================
-:: STEP 3: Ollama & phi4-mini Model
+:: STEP 3: Ollama and phi4-mini Model
 :: ============================================================================
 echo [STEP 3/6] Checking Ollama...
 ollama --version >nul 2>&1
 if %errorlevel% equ 0 (
-    for /f "tokens=*" %%v in ('ollama --version 2^>^&1') do echo [OK] Found %%v
+    echo [OK] Ollama is already installed.
 ) else (
     echo [INSTALL] Installing Ollama via winget...
     winget install -e --id Ollama.Ollama --accept-package-agreements --accept-source-agreements
@@ -106,12 +107,12 @@ if %errorlevel% neq 0 (
 )
 
 :: Pull base model phi4-mini
-echo [MODEL] Pulling base phi4-mini model via Ollama (this may take a few minutes)...
+echo [MODEL] Pulling base phi4-mini model via Ollama...
 ollama pull phi4-mini
 
 :: Create custom wrecz-brain model
 if exist "%~dp0Modelfile" (
-    echo [MODEL] Creating custom 'wrecz-brain' model from Modelfile...
+    echo [MODEL] Creating custom wrecz-brain model from Modelfile...
     ollama create wrecz-brain -f "%~dp0Modelfile"
 ) else (
     echo [WARNING] Modelfile not found at %~dp0Modelfile. Skipping model creation.
@@ -121,12 +122,12 @@ echo.
 :: ============================================================================
 :: STEP 4: Tauri 2 Prerequisites (Rust + MSVC C++ Build Tools)
 :: ============================================================================
-echo [STEP 4/6] Checking Tauri desktop prerequisites (Rust + C++ Build Tools)...
+echo [STEP 4/6] Checking Tauri desktop prerequisites - Rust and C++ Build Tools...
 
 :: Check Rust
 cargo --version >nul 2>&1
 if %errorlevel% equ 0 (
-    for /f "tokens=*" %%v in ('cargo --version 2^>^&1') do echo [OK] Found %%v
+    echo [OK] Rust and Cargo are already installed.
 ) else (
     echo [INSTALL] Installing Rustup toolchain...
     winget install -e --id Rustlang.Rustup --accept-package-agreements --accept-source-agreements
@@ -145,9 +146,9 @@ if exist "%VSWHERE%" (
 where cl >nul 2>&1 && set "HAS_MSVC=1"
 
 if "!HAS_MSVC!"=="1" (
-    echo [OK] Visual Studio C++ Compiler / Build Tools detected.
+    echo [OK] Visual Studio C++ Compiler and Build Tools detected.
 ) else (
-    echo [INSTALL] Installing Visual Studio Build Tools (C++ Workload for Tauri)...
+    echo [INSTALL] Installing Visual Studio Build Tools - C++ Workload for Tauri...
     echo This is required for compiling Tauri native desktop apps.
     winget install -e --id Microsoft.VisualStudio.2022.BuildTools --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" --accept-package-agreements --accept-source-agreements
     call :refresh_path
@@ -155,7 +156,7 @@ if "!HAS_MSVC!"=="1" (
 echo.
 
 :: ============================================================================
-:: STEP 5: Backend Virtual Environment (.venv) & Dependencies
+:: STEP 5: Backend Virtual Environment (.venv) and Dependencies
 :: ============================================================================
 echo [STEP 5/6] Setting up Backend Python Virtual Environment...
 cd /d "%~dp0wrecz"
@@ -190,18 +191,18 @@ call npm install
 echo.
 
 :: ============================================================================
-:: COMPLETION & LAUNCH MENU
+:: COMPLETION AND LAUNCH MENU
 :: ============================================================================
 cls
 echo ======================================================================
-echo         🎉 WRECZ SETUP COMPLETED SUCCESSFULLY!
+echo         WRECZ SETUP COMPLETED SUCCESSFULLY!
 echo ======================================================================
 echo.
 echo All prerequisites, models, and environments are fully configured:
-echo   * Python 3.12 & Backend Virtual Environment (.venv)
-echo   * Node.js LTS & Frontend packages
+echo   * Python 3.12 and Backend Virtual Environment (.venv)
+echo   * Node.js LTS and Frontend packages
 echo   * Ollama running with 'wrecz-brain' (phi4-mini)
-echo   * Rust & MSVC C++ toolchains for Tauri 2
+echo   * Rust and MSVC C++ toolchains for Tauri 2
 echo.
 echo ======================================================================
 echo What would you like to do now?
@@ -211,7 +212,11 @@ echo   [2] Launch Browser Mode (FastAPI 8765 + Vite 8443)
 echo   [3] Run Backend CLI Mode (python main.py)
 echo   [4] Exit installer
 echo.
-set /p "CHOICE=Select an option [1-4]: "
+
+set "CHOICE="
+if "%~1" neq "" set "CHOICE=%~1"
+if not defined CHOICE set /p "CHOICE=Select an option [1-4] (default: 4): "
+if not defined CHOICE set "CHOICE=4"
 
 if "%CHOICE%"=="1" (
     echo Starting WRECZ Native Desktop App...
