@@ -1,14 +1,16 @@
 //! WRECZ desktop shell.
 //!
 //! The window manages both services:
-//! 1. The Vite frontend dev server (port 8443) if not already active.
-//! 2. The Python FastAPI bridge (port 8765) if not already active.
-//! Both are cleanly terminated when the desktop window is closed.
+//! 1. The Vite frontend dev server (port 8443) - initialized first with a 2-second readiness delay.
+//! 2. The Python FastAPI bridge (port 8765) in the background.
+//! The desktop window is displayed only after the frontend server is ready to prevent error flashes.
+//! Both services are cleanly terminated when the window is closed.
 
 use std::net::TcpStream;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
+use std::time::{Duration, Instant};
 
 use tauri::{Manager, RunEvent};
 
@@ -88,22 +90,15 @@ fn port_in_use(host: &str, port: u16) -> bool {
 
 fn spawn_frontend() -> Option<Child> {
     if port_in_use(FRONTEND_HOST, FRONTEND_PORT_NUM) {
-        println!("[WRECZ] Frontend port {FRONTEND_PORT} already in use; connecting to existing server.");
+        println!("[WRECZ] Frontend port {FRONTEND_PORT} already in use; attaching to existing server.");
         return None;
     }
 
     let dir = frontend_dir();
-    let mut command = if cfg!(windows) {
-        let mut cmd = Command::new("cmd");
-        cmd.args(["/c", "npm", "run", "dev", "--", "--port", FRONTEND_PORT, "--host", FRONTEND_HOST]);
-        cmd
-    } else {
-        let mut cmd = Command::new("npm");
-        cmd.args(["run", "dev", "--", "--port", FRONTEND_PORT, "--host", FRONTEND_HOST]);
-        cmd
-    };
-
+    let npm_cmd = if cfg!(windows) { "npm.cmd" } else { "npm" };
+    let mut command = Command::new(npm_cmd);
     command
+        .args(["run", "dev", "--", "--port", FRONTEND_PORT, "--host", FRONTEND_HOST])
         .current_dir(&dir)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit());
@@ -118,17 +113,9 @@ fn spawn_frontend() -> Option<Child> {
     match command.spawn() {
         Ok(child) => {
             println!(
-                "[WRECZ] Frontend dev server starting on {FRONTEND_HOST}:{FRONTEND_PORT} (pid {}).",
+                "[WRECZ] Frontend Vite server starting on {FRONTEND_HOST}:{FRONTEND_PORT} (pid {}).",
                 child.id()
             );
-            // Wait for Vite dev server to respond
-            for _ in 0..20 {
-                if port_in_use(FRONTEND_HOST, FRONTEND_PORT_NUM) {
-                    println!("[WRECZ] Frontend dev server is ready.");
-                    break;
-                }
-                std::thread::sleep(std::time::Duration::from_millis(500));
-            }
             Some(child)
         }
         Err(error) => {
@@ -214,21 +201,42 @@ fn stop_child(child: &mut Child) {
 }
 
 pub fn run() {
+    // 1. Start the frontend Vite server first
+    let frontend_child = spawn_frontend();
+
+    // 2. Start the Python bridge in parallel
+    let bridge_child = spawn_bridge();
+
+    // 3. Wait for the frontend server on port 8443 to be responsive
+    println!("[WRECZ] Waiting for frontend server on {FRONTEND_HOST}:{FRONTEND_PORT}...");
+    let start_wait = Instant::now();
+    while start_wait.elapsed() < Duration::from_secs(6) {
+        if port_in_use(FRONTEND_HOST, FRONTEND_PORT_NUM) {
+            println!("[WRECZ] Frontend port {FRONTEND_PORT} is active.");
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(150));
+    }
+
+    // 4. Ensure Vite's HTTP server is fully warm and ready (~2-second total delay)
+    std::thread::sleep(Duration::from_millis(1800));
+
+    // 5. Build and launch Tauri window
     tauri::Builder::default()
         .manage(Services {
-            bridge: Mutex::new(None),
-            frontend: Mutex::new(None),
+            bridge: Mutex::new(bridge_child),
+            frontend: Mutex::new(frontend_child),
         })
         .setup(|app| {
-            let services = app.state::<Services>();
-            *services.frontend.lock().unwrap() = spawn_frontend();
-            *services.bridge.lock().unwrap() = spawn_bridge();
-
             if let Some(window) = app.get_webview_window("main") {
                 let icon_bytes = include_bytes!("../icons/128x128.png");
                 if let Ok(icon) = tauri::image::Image::from_bytes(icon_bytes) {
                     let _ = window.set_icon(icon);
                 }
+
+                // Show the window now that the frontend server is verified active and responding
+                let _ = window.show();
+                let _ = window.set_focus();
             }
             Ok(())
         })
